@@ -3,7 +3,7 @@
 client_id = "f79c15d7893d2b2d5df2a212357cbd4e"
 name = "product-qrcode-generator"
 handle = "product-qrcode-generator"
-application_url = "https://financial-l-unsubscribe-frequencies.trycloudflare.com"
+application_url = "https://shopify-product-qr-code-generator.onrender.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/auth/callback",
-  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/auth/shopify/callback",
-  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/api/auth/callback"
+  "https://shopify-product-qr-code-generator.onrender.com/auth/callback",
+  "https://shopify-product-qr-code-generator.onrender.com/auth/shopify/callback",
+  "https://shopify-product-qr-code-generator.onrender.com/api/auth/callback"
 ]
 
 [pos]
