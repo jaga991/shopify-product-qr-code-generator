@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f79c15d7893d2b2d5df2a212357cbd4e"
+name = "product-qrcode-generator"
+handle = "product-qrcode-generator"
+application_url = "https://financial-l-unsubscribe-frequencies.trycloudflare.com"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/auth/callback",
+  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/auth/shopify/callback",
+  "https://financial-l-unsubscribe-frequencies.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
