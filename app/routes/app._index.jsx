@@ -89,66 +89,96 @@ export const loader = async ({ request }) => {
 // -----------------------------
 export const action = async ({ request }) => {
   const form = await request.formData();
-  const shopifyProductId = form.get("shopifyProductId");
-  const sizingTableId = form.get("sizingTableId");
+  const _method = form.get("_method");
 
   const { admin } = await authenticate.admin(request);
 
-  //if unlinked choosen
+  // 🗑 Delete a sizing table
+  if (_method === "delete") {
+    const deleteTableId = form.get("deleteTableId");
+
+    // Get all products linked to this sizing table
+    const linkedProducts = await db.product.findMany({
+      where: { sizingTableId: deleteTableId },
+    });
+
+    // Delete metafields from Shopify for each product
+    for (const product of linkedProducts) {
+      await admin.graphql(`
+        mutation MetafieldsDelete($metafields: [MetafieldIdentifierInput!]!) {
+          metafieldsDelete(metafields: $metafields) {
+            deletedMetafields { key }
+            userErrors { message }
+          }
+        }
+      `, {
+        variables: {
+          metafields: [{
+            ownerId: product.shopifyProductId,
+            namespace: "custom",
+            key: "sizing_data"
+          }]
+        }
+      });
+    }
+
+    // Unlink all related products in DB
+    await db.product.deleteMany({
+      where: { sizingTableId: deleteTableId },
+    });
+
+    // Delete the sizing table from DB
+    await db.sizingTable.delete({
+      where: { id: deleteTableId },
+    });
+
+    return json({ deleted: true });
+  }
+
+  // 🔗 Link product to sizing table (existing logic)
+  const shopifyProductId = form.get("shopifyProductId");
+  const sizingTableId = form.get("sizingTableId");
+
   if (!sizingTableId) {
-    // If user selects "Unlinked" → remove sizingTable from DB and metafield
     await db.product.deleteMany({
       where: { shopifyProductId },
     });
 
-    // Delete metafield from Shopify
-    const response = await admin.graphql(`
+    await admin.graphql(`
       mutation MetafieldsDelete($metafields: [MetafieldIdentifierInput!]!) {
         metafieldsDelete(metafields: $metafields) {
-          deletedMetafields {
-            key
-            namespace
-            ownerId
-          }
-          userErrors {
-            field
-            message
-          }
+          deletedMetafields { key }
+          userErrors { message }
         }
       }
     `, {
       variables: {
-        metafields: [
-          {
-            ownerId: shopifyProductId,
-            namespace: "custom",
-            key: "sizing_data",
-          }
-        ]
+        metafields: [{
+          ownerId: shopifyProductId,
+          namespace: "custom",
+          key: "sizing_data",
+        }]
       }
     });
-    
-    const result = await response.json();
-    console.log("🗑 metafieldsDelete result:", JSON.stringify(result, null, 2));
 
     return json({ success: true, unlinked: true });
   }
 
-  //else, link product to table
-  const sizingTable = await db.sizingTable.findUnique({ where: { id: sizingTableId } });
+  const sizingTable = await db.sizingTable.findUnique({
+    where: { id: sizingTableId },
+  });
+
   if (!sizingTable) return json({ error: "Invalid sizing table" }, { status: 400 });
 
-  // Update local DB
   await db.product.upsert({
     where: { shopifyProductId },
     update: { sizingTableId },
     create: {
       shopifyProductId,
       sizingTableId,
-    }
+    },
   });
 
-  // Push metafield to Shopify
   const response = await admin.graphql(`
     mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
       metafieldsSet(metafields: $metafields) {
@@ -167,22 +197,18 @@ export const action = async ({ request }) => {
     }
   `, {
     variables: {
-      metafields: [
-        {
-          namespace: "custom",
-          key: "sizing_data",
-          ownerId: shopifyProductId,
-          type: "json",
-          value: JSON.stringify(sizingTable.data),
-        },
-      ],
-    }
+      metafields: [{
+        namespace: "custom",
+        key: "sizing_data",
+        ownerId: shopifyProductId,
+        type: "json",
+        value: JSON.stringify(sizingTable.data),
+      }],
+    },
   });
-  
+
   const result = await response.json();
   console.log("📦 metafieldsSet result:", JSON.stringify(result, null, 2));
-  
-  
 
   return json({ success: true });
 };
@@ -284,7 +310,7 @@ export default function Index() {
           {/* Sizing Tables */}
           {selectedTab === 1 && (
             <Layout.Section>
-              <Button primary onClick={() => navigate("/app/sizingchart")}>
+              <Button primary onClick={() => navigate("/app/new/sizingchart")}>
                 Add Sizing Table
               </Button>
 
@@ -327,9 +353,20 @@ export default function Index() {
                             </code>
                           </Text>
                           <div style={{ marginTop: "0.5rem" }}>
-                            <Button size="slim" onClick={() => navigate(`/app/sizingchart/${table.id}/edit`)}>
-                              Edit
-                            </Button>
+                            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                              <Button size="slim" onClick={() => navigate(`/app/${table.id}/sizingchart`)}>
+                                Edit
+                              </Button>
+                              <fetcher.Form method="post" onSubmit={(e) => {
+                                if (!confirm("Are you sure you want to delete this sizing table?")) e.preventDefault();
+                              }}>
+                                <input type="hidden" name="_method" value="delete" />
+                                <input type="hidden" name="deleteTableId" value={table.id} />
+                                <Button size="slim" destructive submit>
+                                  Delete
+                                </Button>
+                              </fetcher.Form>
+                            </div>
                           </div>
                         </IndexTable.Cell>
                       </IndexTable.Row>
