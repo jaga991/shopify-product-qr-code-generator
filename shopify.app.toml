@@ -3,7 +3,7 @@
 client_id = "f79c15d7893d2b2d5df2a212357cbd4e"
 name = "product-qrcode-generator"
 handle = "product-qrcode-generator"
-application_url = "https://championship-aspect-none-newly.trycloudflare.com"
+application_url = "https://cart-adjusted-brunette-alone.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://championship-aspect-none-newly.trycloudflare.com/auth/callback",
-  "https://championship-aspect-none-newly.trycloudflare.com/auth/shopify/callback",
-  "https://championship-aspect-none-newly.trycloudflare.com/api/auth/callback"
+  "https://cart-adjusted-brunette-alone.trycloudflare.com/auth/callback",
+  "https://cart-adjusted-brunette-alone.trycloudflare.com/auth/shopify/callback",
+  "https://cart-adjusted-brunette-alone.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
