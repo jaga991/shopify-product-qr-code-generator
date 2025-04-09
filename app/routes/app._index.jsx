@@ -94,6 +94,47 @@ export const action = async ({ request }) => {
 
   const { admin } = await authenticate.admin(request);
 
+  //if unlinked choosen
+  if (!sizingTableId) {
+    // If user selects "Unlinked" → remove sizingTable from DB and metafield
+    await db.product.deleteMany({
+      where: { shopifyProductId },
+    });
+
+    // Delete metafield from Shopify
+    const response = await admin.graphql(`
+      mutation MetafieldsDelete($metafields: [MetafieldIdentifierInput!]!) {
+        metafieldsDelete(metafields: $metafields) {
+          deletedMetafields {
+            key
+            namespace
+            ownerId
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `, {
+      variables: {
+        metafields: [
+          {
+            ownerId: shopifyProductId,
+            namespace: "custom",
+            key: "sizing_data",
+          }
+        ]
+      }
+    });
+    
+    const result = await response.json();
+    console.log("🗑 metafieldsDelete result:", JSON.stringify(result, null, 2));
+
+    return json({ success: true, unlinked: true });
+  }
+
+  //else, link product to table
   const sizingTable = await db.sizingTable.findUnique({ where: { id: sizingTableId } });
   if (!sizingTable) return json({ error: "Invalid sizing table" }, { status: 400 });
 
@@ -225,7 +266,7 @@ export default function Index() {
                               fetcher.submit({ shopifyProductId: product.id, sizingTableId: value }, { method: "post" });
                             }}
                             options={[
-                              { label: "Unlinked", value: "" },
+                              { label: "Unlinked", value: "" }, // 🔁 this triggers the unlink logic
                               ...sizingTables.map((table) => ({
                                 label: table.apparelType,
                                 value: table.id,
