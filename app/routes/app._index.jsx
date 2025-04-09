@@ -316,10 +316,21 @@ export default function Index() {
                         </IndexTable.Cell>
                         <IndexTable.Cell>
                           <Text variant="bodyMd" as="span">
-                            <code style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block", maxWidth: 400 }}>
+                            <code style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              display: "block",
+                              maxWidth: 400
+                            }}>
                               {JSON.stringify(table.data).slice(0, 100)}...
                             </code>
                           </Text>
+                          <div style={{ marginTop: "0.5rem" }}>
+                            <Button size="slim" onClick={() => navigate(`/app/sizingchart/${table.id}/edit`)}>
+                              Edit
+                            </Button>
+                          </div>
                         </IndexTable.Cell>
                       </IndexTable.Row>
                     ))}
