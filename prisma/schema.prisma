@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
 }
 
 model Session {
@@ -28,15 +28,20 @@ model Session {
   emailVerified Boolean?  @default(false)
 }
 
-model QRCode {
-  id               Int      @id @default(autoincrement())
-  title            String
-  shop             String
-  productId        String
-  productHandle    String
-  productVariantId String
-  destination      String
-  scans            Int      @default(0)
-  createdAt        DateTime @default(now())
+model SizingTable {
+  id          String    @id @default(cuid())
+  apparelType String    @unique
+  data        Json
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
+model Product {
+  id               String   @id @default(cuid())
+  shopifyProductId String   @unique
+  sizingTableId    String
+  sizingTable      SizingTable @relation(fields: [sizingTableId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

@@ -3,7 +3,7 @@
 client_id = "f79c15d7893d2b2d5df2a212357cbd4e"
 name = "product-qrcode-generator"
 handle = "product-qrcode-generator"
-application_url = "https://screensavers-reproduced-forests-summary.trycloudflare.com"
+application_url = "https://torture-copyright-hiv-syracuse.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://screensavers-reproduced-forests-summary.trycloudflare.com/auth/callback",
-  "https://screensavers-reproduced-forests-summary.trycloudflare.com/auth/shopify/callback",
-  "https://screensavers-reproduced-forests-summary.trycloudflare.com/api/auth/callback"
+  "https://torture-copyright-hiv-syracuse.trycloudflare.com/auth/callback",
+  "https://torture-copyright-hiv-syracuse.trycloudflare.com/auth/shopify/callback",
+  "https://torture-copyright-hiv-syracuse.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
