@@ -208,7 +208,7 @@ export const action = async ({ request }) => {
   });
 
   const result = await response.json();
-  console.log("📦 metafieldsSet result:", JSON.stringify(result, null, 2));
+  console.log(" metafieldsSet result:", JSON.stringify(result, null, 2));
 
   return json({ success: true });
 };
